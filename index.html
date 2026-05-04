@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acceso</title>
+
+<style>
+body{
+margin:0;
+background:black;
+overflow:hidden;
+}
+
+/* video oculto */
+#videoContainer{
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+justify-content:center;
+align-items:center;
+background:black;
+}
+
+video{
+max-width:100%;
+max-height:100%;
+object-fit:contain;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="canvas"></canvas>
+
+<div id="videoContainer">
+<video autoplay muted playsinline id="video">
+<source src="sorpresa.mp4" type="video/mp4">
+</video>
+</div>
+
+<script>
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let puntos = [];
+let dibujando = false;
+let timeoutReset;
+
+// iniciar trazo
+function start(e){
+  dibujando = true;
+  puntos = [];
+  clearTimeout(timeoutReset);
+}
+
+// mover
+function move(e){
+  if(!dibujando) return;
+
+  let x = e.touches ? e.touches[0].clientX : e.clientX;
+  let y = e.touches ? e.touches[0].clientY : e.clientY;
+
+  puntos.push({x,y});
+
+  // reset si pasa 1 segundo sin moverse
+  clearTimeout(timeoutReset);
+  timeoutReset = setTimeout(resetear, 1000);
+}
+
+// terminar trazo
+function end(){
+  dibujando = false;
+
+  if(validarR(puntos)){
+    desbloquear();
+  } else {
+    resetear();
+  }
+}
+
+// reset total
+function resetear(){
+  puntos = [];
+}
+
+// VALIDAR GESTO "R"
+function validarR(p){
+
+  if(p.length < 50) return false;
+
+  let tercio = Math.floor(p.length / 3);
+
+  let p1 = p.slice(0, tercio);
+  let p2 = p.slice(tercio, tercio*2);
+  let p3 = p.slice(tercio*2);
+
+  // 1️⃣ subida vertical
+  let subida = p1[0].y - p1[p1.length-1].y > 100;
+
+  // 2️⃣ curva derecha
+  let derecha = p2[p2.length-1].x - p2[0].x > 50;
+
+  // 3️⃣ bajada diagonal
+  let baja = p3[p3.length-1].y - p3[0].y > 80;
+  let diagonal = p3[p3.length-1].x - p3[0].x > 30;
+
+  return subida && derecha && baja && diagonal;
+}
+
+// desbloquear
+function desbloquear(){
+  document.getElementById("canvas").style.display="none";
+  document.getElementById("videoContainer").style.display="flex";
+}
+
+// eventos táctiles
+canvas.addEventListener("touchstart", start);
+canvas.addEventListener("touchmove", move);
+canvas.addEventListener("touchend", end);
+
+// eventos ratón (PC)
+canvas.addEventListener("mousedown", start);
+canvas.addEventListener("mousemove", move);
+canvas.addEventListener("mouseup", end);
+
+// ocultar video al terminar (solo una vez)
+const video = document.getElementById("video");
+
+video.onended = function(){
+  video.style.display = "none";
+  document.body.style.background = "black";
+};
+
+</script>
+
+<script data-goatcounter="https://fotomagica.goatcounter.com/count"
+async src="//gc.zgo.at/count.js"></script>
+
+</body>
+</html>
