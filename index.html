@@ -33,7 +33,7 @@
     opacity: 0.8;
   }
 
-  .sonido {
+  .sonidoInfo {
     position: absolute;
     top: 30px;
     font-size: 0.8rem;
@@ -45,24 +45,60 @@
 
 <body>
 
-<video autoplay muted loop playsinline id="video">
-  <source src="video3.mp4" type="video/mp4">
+<video id="video">
+  <source src="Oscar.mp4" type="video/mp4">
 </video>
 
-<div class="mensaje">
-
+<div class="mensaje" id="mensajeTexto">
+ 
 </div>
 
-<div class="sonido">
+<div class="sonidoInfo" id="infoSonido">
   Toca la pantalla para activar sonido
 </div>
 
 <script>
+
+  // 🔘 INTERRUPTORES
+  const autoplay = true;     // true / false
+  const sonido = false;      // true = empieza con sonido (NO funciona en móviles)
+  const bucle = false;        // true / false
+  const mostrarMensaje = true;
+
   const video = document.getElementById("video");
+  const mensaje = document.getElementById("mensajeTexto");
+  const infoSonido = document.getElementById("infoSonido");
+
+  // Aplicar bucle
+  video.loop = bucle;
+
+  // Aplicar sonido inicial
+  video.muted = !sonido;
+
+  // Mostrar / ocultar mensaje
+  if (!mostrarMensaje) {
+    mensaje.style.display = "none";
+  }
+
+  // Autoplay
+  if (autoplay) {
+    video.play().catch(() => {});
+  }
+
+  // Activar sonido al tocar
   document.body.addEventListener("click", function() {
-    video.muted = false;
-    video.play();
+    if (!sonido) {
+      video.muted = false;
+      video.play();
+      infoSonido.style.display = "none";
+    }
   });
+
+  // Si el sonido empieza activado, ocultamos aviso
+  if (sonido) {
+    infoSonido.style.display = "none";
+  }
+
 </script>
 
 <script data-goatcounter="https://fotomagica.goatcounter.com/count"
